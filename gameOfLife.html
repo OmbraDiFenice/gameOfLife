@@ -1,0 +1,163 @@
+<html>
+<head>
+<title>Game of Life</title>
+</head>
+<body>
+<canvas id="myCanvas" width="900" height="900"></canvas>
+<script>
+const c = document.getElementById("myCanvas");
+const ctx = c.getContext("2d");
+
+const width = 80;
+const height = 80;
+const cellSize = 15;
+
+function drawGrid(ctx, width, height, cellSize) {
+    ctx.strokeStyle = "#999999";
+
+    // rows
+    for(let y = 0; y <= height * cellSize; y += cellSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width * cellSize, y);
+        ctx.stroke();
+    }
+
+    // columns
+    for(let x = 0; x <= width * cellSize; x += cellSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height * cellSize);
+        ctx.stroke();
+    }
+}
+
+function drawCell(ctx, x, y, alive, cellSize) {
+    ctx.fillStyle = alive ? "#FF0000" : "#FFFFFF";
+    ctx.fillRect(x * cellSize + 3, y * cellSize + 3, cellSize - 6, cellSize - 6); 
+}
+
+function generation(world, width, height) {
+    nextWorld = createWorld(width, height);
+    for(let x = 0; x < width; ++x) {
+        for(let y = 0; y < height; ++y) {
+            let nearAlive = 0;
+
+            for(let i = -1; i < 2; ++i) {
+                for(let j = -1; j < 2; ++j) {
+                    if(!(i == 0 && j == 0) && x+i >= 0 && x+i < width && y+j >= 0 && y+j < height && world[(x+i) + width * (y+j)] == 1) ++nearAlive;
+                }
+            }
+            
+            if(world[x + width * y] == 1) {
+                if(nearAlive < 2 || nearAlive > 3) nextWorld[x + width * y] = 0;
+                else nextWorld[x + width * y] = 1;
+            } else {
+                if(nearAlive == 3) nextWorld[x + width * y] = 1;
+            }
+        }
+    }
+    return nextWorld;
+}
+
+function drawWorld(ctx, world, width, height, cellSize) {
+    for(let x = 0; x < width; ++x) {
+        for(let y = 0; y < height; ++y) {
+            drawCell(ctx, x, y, world[x + width * y] == 1, cellSize);
+        }
+    }
+}
+
+function createWorld(width, height) {
+    world = []
+    for(let x = 0; x < width; ++x) {
+        for(let y = 0; y < height; ++y) {
+            world[x + width * y] = 0;
+        }
+    }
+    return world;
+}
+
+drawGrid(ctx, width, height, cellSize);
+
+world = createWorld(width, height);
+
+presets = {
+    infiniteWorm: (world) => {
+        for(let i = 0; i < 42; ++i) {
+            if(
+                (i >= 1 && i <= 8) ||
+                (i >= 10 && i <= 14) ||
+                (i >= 18 && i <= 20) ||
+                (i >= 27 && i <= 33) ||
+                (i >= 35 && i <= 39)
+              ) world[i + width] = 1;
+        }
+    },
+
+    blocklayingSwitchEngine: (world) => {
+        const offX = Math.floor(width / 2);
+        const offY = Math.floor(height / 2);
+        world[offX + 1 + width * (offY + 1)] = 1;
+        world[offX + 2 + width * (offY + 1)] = 1;
+        world[offX + 3 + width * (offY + 1)] = 1;
+        world[offX + 5 + width * (offY + 1)] = 1;
+        world[offX + 1 + width * (offY + 2)] = 1;
+        world[offX + 4 + width * (offY + 3)] = 1;
+        world[offX + 5 + width * (offY + 3)] = 1;
+        world[offX + 2 + width * (offY + 4)] = 1;
+        world[offX + 3 + width * (offY + 4)] = 1;
+        world[offX + 5 + width * (offY + 4)] = 1;
+        world[offX + 1 + width * (offY + 5)] = 1;
+        world[offX + 3 + width * (offY + 5)] = 1;
+        world[offX + 5 + width * (offY + 5)] = 1;
+    },
+
+    gliderGun: (world) => {
+        world[1 + width * 5] = 1;
+        world[1 + width * 6] = 1;
+        world[2 + width * 5] = 1;
+        world[2 + width * 6] = 1;
+        world[11 + width * 5] = 1;
+        world[11 + width * 6] = 1;
+        world[11 + width * 7] = 1;
+        world[12 + width * 4] = 1;
+        world[12 + width * 8] = 1;
+        world[13 + width * 3] = 1;
+        world[13 + width * 9] = 1;
+        world[14 + width * 3] = 1;
+        world[14 + width * 9] = 1;
+        world[15 + width * 6] = 1;
+        world[16 + width * 4] = 1;
+        world[16 + width * 8] = 1;
+        world[17 + width * 5] = 1;
+        world[17 + width * 6] = 1;
+        world[17 + width * 7] = 1;
+        world[18 + width * 6] = 1;
+        world[21 + width * 3] = 1;
+        world[21 + width * 4] = 1;
+        world[21 + width * 5] = 1;
+        world[22 + width * 3] = 1;
+        world[22 + width * 4] = 1;
+        world[22 + width * 5] = 1;
+        world[23 + width * 2] = 1;
+        world[23 + width * 6] = 1;
+        world[25 + width * 1] = 1;
+        world[25 + width * 2] = 1;
+        world[25 + width * 6] = 1;
+        world[25 + width * 7] = 1;
+        world[35 + width * 3] = 1;
+        world[35 + width * 4] = 1;
+        world[36 + width * 3] = 1;
+        world[36 + width * 4] = 1;
+    }
+}
+
+world = createWorld(width, height);
+presets.gliderGun(world);
+drawWorld(ctx, world, width, height, cellSize);
+
+const tick = setInterval(() => {
+    drawWorld(ctx, world, width, height, cellSize);
+    world = generation(world, width, height);
+}, 100);
+
+</script></body>
